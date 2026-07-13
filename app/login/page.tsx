@@ -1,0 +1,99 @@
+'use client'
+import { useState } from "react"
+import styles from "./login.module.css"
+
+import { useRouter } from "next/navigation"
+
+
+
+export default function LoginPage(){
+
+    const router = useRouter()
+
+    const [email, setEmail] = useState("string")
+    const [password, setPassword] = useState("string")
+
+    const submitForm = async() => {
+
+        try{
+
+        const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}/user/login`
+        console.log(email, password, url)
+
+        const resp = await fetch(url, {
+            method: "POST",
+            headers: {
+    'Content-Type': 'application/json',
+  },
+            body: JSON.stringify(
+                {
+                    "email": email,
+                    "password": password
+                }
+            )
+            
+        })
+
+        if (resp.status == 401){
+            alert("Wrong Email or Password");
+            return
+        }
+
+        if (resp.status == 200){
+            console.log(resp)
+            const data = await resp.json()
+            console.log(data);
+
+            localStorage.setItem("access_token", data.access_token)
+
+            router.push("/dashboard")
+
+        }
+
+        } catch (e){
+            alert(`Error, ${e}`)
+        }
+
+
+
+    }
+
+
+    return(
+
+        <>
+
+
+        <div 
+        className={styles.Navbar}>
+            <h2>Gemmo</h2>
+        </div>
+
+        <br /><br /><br />
+        <br /><br /><br />
+
+          <div className={styles.mainBoxCont}>
+            <form action={submitForm} className={styles.formCotn}>
+
+                <h1>Welcome Back 👋</h1>
+                <p>Please login to access your account</p>
+
+                <br /><br />
+
+                <label htmlFor="">Email</label>
+                <input onChange={(e) => {setEmail(e.target.value)}} type="text" placeholder="user@example.com" />
+
+                <br />
+                <label htmlFor="">Password</label>
+                <input onChange={(e)=>{setPassword(e.target.value)}} type="password" placeholder="password" />
+
+                <br />
+
+                <p>No account ? <a href="/signup">Signup</a></p>
+                <button className={styles.loginButton}>Login</button>
+            </form>
+        </div>
+        </>
+      
+    )
+}
